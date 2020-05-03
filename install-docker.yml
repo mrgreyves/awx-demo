@@ -73,17 +73,3 @@
       owner: root
       group: root
       mode: '0555'
-
-  - name: Create temp directory
-    file:
-      path: /root/tmp
-      state: directory
-      mode: '0755'
-
-  - name: Copy goss config file
-    copy:
-      src: goss.yaml
-      dest: /root/tmp
-      owner: root
-      group: root
-      mode: '0666'
