@@ -1,0 +1,89 @@
+---
+- name: Install nginx
+  hosts: all
+  become: true
+  tasks:
+
+  - name: Install gpg key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Add docker repo
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+      state: present
+
+
+  - name: Update
+    apt:
+      update_cache: yes
+    tags: docker
+
+  - name: Install docker
+    apt:
+      name: docker-ce
+      state: latest
+    tags: docker
+
+  - name: Restart and enable docker service
+    service:
+      name: docker
+      state: restarted
+      enabled: yes
+    tags: docker
+
+  - name: Download docker-compose
+    get_url:
+      url: https://github.com/docker/compose/releases/download/1.23.2/docker-compose-Linux-x86_64
+      dest: /usr/local/bin/docker-compose
+      mode: 0555
+    tags: docker
+
+  - name: Create sym link to docker-compose
+    file:
+      src: /usr/local/bin/docker-compose
+      dest: /usr/bin/docker-compose
+      state: link
+      owner: root
+      group: root
+    tags: docker
+
+  - name: Download goss binary
+    get_url:
+      url: https://github.com/aelsabbahy/goss/releases/latest/download/goss-linux-amd64
+      dest: /usr/local/bin/goss
+
+
+  - name: Change goss permissions
+    file:
+      path: /usr/local/bin/goss
+      owner: root
+      group: root
+      mode: '0555'
+
+  - name: Download dgoss binary
+    get_url:
+      url: https://github.com/aelsabbahy/goss/releases/latest/download/dgoss
+      dest: /usr/local/bin/dgoss
+
+  - name: Change dgoss permissions
+    file:
+      path: /usr/local/bin/dgoss
+      owner: root
+      group: root
+      mode: '0555'
+
+  - name: Create temp directory
+    file:
+      path: /root/tmp
+      state: directory
+      mode: '0755'
+
+  - name: Copy goss config file
+    copy:
+      src: goss.yaml
+      dest: /root/tmp
+      owner: root
+      group: root
+      mode: '0666'
